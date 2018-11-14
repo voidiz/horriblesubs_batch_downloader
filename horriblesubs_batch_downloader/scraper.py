@@ -49,7 +49,7 @@ class Scraper():
                             print("found res: {}".format(r))
                             break
                         elif (r == 'fallback'):
-                            links += c.select(selectors[r])[-1] # last matched item; usually the highest available resolution
+                            links.append(c.select(selectors[r])[-1]) # last matched item; usually the highest available resolution
                             print("found res: {}".format(r))
                             break
             next_id += 1
@@ -63,9 +63,7 @@ class Scraper():
 # testing
 test = Scraper(url="https://horriblesubs.info/shows/k")
 test.get_show_id()
-print(test.show_id)
+#print(test.show_id)
 test.create_torrent_links()
 print(test.links)
-asdfk = {l:n for l,n in enumerate(test.links)}
-print(asdfk)
 

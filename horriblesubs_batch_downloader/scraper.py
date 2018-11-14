@@ -48,7 +48,7 @@ class Scraper():
                             link = c.select(selectors[r])[-1] # last matched item; usually the highest available resolution
                             print("found res: {}".format(r))
                             break
-                links.append(link)
+                links.append(link.get('href'))
 
             next_id += 1
             api_url = "https://horriblesubs.info/api.php?method=getshows&type=show&showid={}&nextid={}".format(self.show_id, next_id)
@@ -59,8 +59,11 @@ class Scraper():
         pass
 
 # testing
-test = Scraper(url="https://horriblesubs.info/shows/k")
+#test = Scraper(url="https://horriblesubs.info/shows/k")
+test = Scraper(url="https://horriblesubs.info/shows/yahari-ore-no-seishun-love-come-wa-machigatteiru-zoku/#02")
 test.get_show_id()
 #print(test.show_id)
 test.create_torrent_links()
 print(test.links)
+#for l in test.links:
+#    subprocess.call(['xdg-open'], l)

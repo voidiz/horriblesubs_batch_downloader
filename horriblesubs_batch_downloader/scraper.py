@@ -39,19 +39,17 @@ class Scraper():
             for c in s.find_all(class_="rls-links-container"):
                 if res and res in resolutions and c.select(selectors[res]): # specified resolution
                     if c.select(selectors[res]):
-                        links += c.select(selectors[res])
+                        link = c.select(selectors[res])[0]
                     else: # fallback if resolution isn't found
-                        links += c.select(selectors['fallback'])
+                        link = c.select(selectors['fallback'])[0]
                 elif res is None: # highest quality
                     for r in resolutions:
-                        if (c.select(selectors[r]) and r != 'fallback'):
-                            links += c.select(selectors[r])
+                        if (c.select(selectors[r])):
+                            link = c.select(selectors[r])[-1] # last matched item; usually the highest available resolution
                             print("found res: {}".format(r))
                             break
-                        elif (r == 'fallback'):
-                            links.append(c.select(selectors[r])[-1]) # last matched item; usually the highest available resolution
-                            print("found res: {}".format(r))
-                            break
+                links.append(link)
+
             next_id += 1
             api_url = "https://horriblesubs.info/api.php?method=getshows&type=show&showid={}&nextid={}".format(self.show_id, next_id)
 
@@ -66,4 +64,3 @@ test.get_show_id()
 #print(test.show_id)
 test.create_torrent_links()
 print(test.links)
-

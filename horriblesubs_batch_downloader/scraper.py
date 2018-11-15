@@ -11,14 +11,15 @@ class Scraper():
         self.links = None
 
     def create_url_from_show_name(self):
-        self.url = "https://horriblesubs.info/shows/{}".format(self.show_name)
+        show_slug = re.sub(r" +", "-", self.show_name)
+        self.url = "https://horriblesubs.info/shows/{}".format(show_slug)
 
     def get_show_id(self):
         r = requests.get(self.url)
         s = BeautifulSoup(r.text, 'lxml')
         id_obj = s.find(text=re.compile(r"var hs_showid = \d+;"))
         if not id_obj:
-            raise ValueError("Couldn't find show id, most likely invalid URL.")
+            raise ValueError("Couldn't find show id, most likely invalid URL/show name")
         self.show_id = re.search(r"\d+", id_obj).group(0)
 
     # Fetch all episodes with optional resolution, fetches
@@ -63,6 +64,11 @@ class Scraper():
 
     def fetch_all_episodes(self):
         return self.links
+
+    def fetch_episode(self, episode):
+        if episode > len(self.links) or episode < 1:
+            raise ValueError("Invalid episode number, please choose a number between 1 and {}".format(len(self.links)))
+        return self.links[episode]
 
     def fetch_episodes_in_range(self, lower, upper):
         if upper > len(self.links) or lower < 1:

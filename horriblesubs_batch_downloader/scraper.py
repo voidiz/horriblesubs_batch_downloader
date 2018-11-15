@@ -1,10 +1,7 @@
+#!/usr/bin/env python3
+
 import requests, re
 from bs4 import BeautifulSoup
-
-"""
-https://horriblesubs.info/shows/
-https://horriblesubs.info/api.php?method=getshows&type=show&showid=476&nextid=0
-"""
 
 class Scraper():
     def __init__(self, show_name=None, url=None):
@@ -20,6 +17,8 @@ class Scraper():
         r = requests.get(self.url)
         s = BeautifulSoup(r.text, 'lxml')
         id_obj = s.find(text=re.compile(r"var hs_showid = \d+;"))
+        if not id_obj:
+            raise ValueError("Couldn't find show id, most likely invalid URL.")
         self.show_id = re.search(r"\d+", id_obj).group(0)
 
     # Fetch all episodes with optional resolution, fetches
@@ -37,16 +36,23 @@ class Scraper():
         while requests.get(api_url).text != "DONE":
             s = BeautifulSoup(requests.get(api_url).text, 'lxml')
             for c in s.find_all(class_="rls-links-container"):
-                if res and res in resolutions and c.select(selectors[res]): # specified resolution
+
+                # select specified resolution
+                if res and res in resolutions and c.select(selectors[res]):
                     if c.select(selectors[res]):
                         link = c.select(selectors[res])[0]
-                    else: # fallback if resolution isn't found
+
+                    # seleect fallback if resolution isn't found
+                    else:
                         link = c.select(selectors['fallback'])[0]
-                elif res is None: # highest quality
+
+                # select the highest quality
+                elif res is None:
                     for r in resolutions:
                         if (c.select(selectors[r])):
-                            link = c.select(selectors[r])[-1] # last matched item; usually the highest available resolution
-                            print("found res: {}".format(r))
+                            # last matched item; usually the highest available resolution
+                            link = c.select(selectors[r])[-1]
+                            # print("found res: {}".format(r))
                             break
                 links.append(link.get('href'))
 
@@ -55,15 +61,23 @@ class Scraper():
 
         self.links = links[::-1]
 
-    def fetch_episodes_in_range(self):
-        pass
+    def fetch_all_episodes(self):
+        return self.links
 
-# testing
-#test = Scraper(url="https://horriblesubs.info/shows/k")
-test = Scraper(url="https://horriblesubs.info/shows/yahari-ore-no-seishun-love-come-wa-machigatteiru-zoku/#02")
-test.get_show_id()
-#print(test.show_id)
-test.create_torrent_links()
-print(test.links)
-#for l in test.links:
-#    subprocess.call(['xdg-open'], l)
+    def fetch_episodes_in_range(self, lower, upper):
+        if upper > len(self.links) or lower < 1:
+            raise ValueError("Invalid range, please specify a range between 1 and {}.".format(len(self.links)))
+        return self.links[lower-1:upper]
+
+
+
+## testing
+# test = Scraper(url="https://horriblesubs.info/shows/k")
+# test = Scraper(url="https://horriblesubs.info/shows/yahari-ore-no-seishun-love-come-wa-machigatteiru-zoku/#02")
+# test.get_show_id()
+# print(test.show_id)
+# test.create_torrent_links()
+# print(test.fetch_episodes_in_range(1, 20))
+# print(test.links)
+# for l in test.links:
+#     subprocess.call(['xdg-open'], l)

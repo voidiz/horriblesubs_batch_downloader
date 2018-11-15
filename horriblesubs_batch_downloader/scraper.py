@@ -43,7 +43,7 @@ class Scraper():
                     if c.select(selectors[res]):
                         link = c.select(selectors[res])[0]
 
-                    # seleect fallback if resolution isn't found
+                    # select fallback if resolution isn't found
                     else:
                         link = c.select(selectors['fallback'])[0]
 

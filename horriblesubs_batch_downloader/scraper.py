@@ -39,16 +39,19 @@ class Scraper():
             for c in s.find_all(class_="rls-links-container"):
 
                 # select specified resolution
-                if res and res in resolutions and c.select(selectors[res]):
+                if res and res in resolutions:
                     if c.select(selectors[res]):
                         link = c.select(selectors[res])[0]
 
                     # select fallback if resolution isn't found
                     else:
-                        link = c.select(selectors['fallback'])[0]
+                        link = c.select(selectors['fallback'])[-1]
+
+                elif res and res not in resolutions:
+                    raise ValueError("Invalid resolution, has to be {}.".format("/".join(resolutions[0:-1])))
 
                 # select the highest quality
-                elif res is None:
+                else:
                     for r in resolutions:
                         if (c.select(selectors[r])):
                             # last matched item; usually the highest available resolution
@@ -68,22 +71,9 @@ class Scraper():
     def fetch_episode(self, episode):
         if episode > len(self.links) or episode < 1:
             raise ValueError("Invalid episode number, please choose a number between 1 and {}".format(len(self.links)))
-        return self.links[episode]
+        return [self.links[episode]]
 
     def fetch_episodes_in_range(self, lower, upper):
         if upper > len(self.links) or lower < 1:
             raise ValueError("Invalid range, please specify a range between 1 and {}.".format(len(self.links)))
         return self.links[lower-1:upper]
-
-
-
-## testing
-# test = Scraper(url="https://horriblesubs.info/shows/k")
-# test = Scraper(url="https://horriblesubs.info/shows/yahari-ore-no-seishun-love-come-wa-machigatteiru-zoku/#02")
-# test.get_show_id()
-# print(test.show_id)
-# test.create_torrent_links()
-# print(test.fetch_episodes_in_range(1, 20))
-# print(test.links)
-# for l in test.links:
-#     subprocess.call(['xdg-open'], l)

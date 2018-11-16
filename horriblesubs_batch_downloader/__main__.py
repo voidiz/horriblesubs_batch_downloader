@@ -14,7 +14,6 @@ Examples:
     # Download episodes 1 through 5 in 720p using a show name:
     horriblesubs_batch_downloader -n "Kuzu no Honkai" 1 5 -r 720
 
-
 Options:
     -h, --help          Show this screen.
     -a, --all           Download all episodes.
@@ -23,16 +22,40 @@ Options:
 
 """
 
+import time
+
 from docopt import docopt
 from .scraper import Scraper
 from .downloader import Downloader
 
 def main():
-    url = input("Input url: ")
-    scraper = Scraper(url=url)
+    args = docopt(__doc__)
+    print(args)
+
+    # URL specified
+    if args['<url>']:
+        scraper = Scraper(url=args['<url>'])
+    # Name specified
+    elif args['<show_name>']:
+        scraper = Scraper(show_name=args['<show_name>'])
+        scraper.create_url_from_show_name()
+
     scraper.get_show_id()
-    scraper.create_torrent_links()
-    downloader = Downloader(links=scraper.fetch_all_episodes())
+    print("Found show id: {}".format(scraper.show_id))
+    scraper.create_torrent_links(res=args['<res>'])
+
+    # Range specified
+    if args['<start>'] and args['<end>']:
+        downloader = Downloader(links=scraper.fetch_episodes_in_range(int(args['<start>']), int(args['<end>'])))
+    # Episode specified
+    elif args['<episode>']:
+        downloader = Downloader(links=scraper.fetch_episode(int(args['<episode>'])))
+    # Fetch all
+    else:
+        downloader = Downloader(links=scraper.fetch_all_episodes())
+
+    print("Found {} episodes! Downloading in 5 seconds, press CTRL-C to cancel.".format(len(downloader.links)))
+    time.sleep(5)
     downloader.open_links()
 
 if __name__ == "__main__":

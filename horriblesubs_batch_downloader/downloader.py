@@ -10,10 +10,10 @@ class Downloader():
     def open_links(self):
         for link in self.links:
             if sys.platform.startswith("linux"):
-                subprocess.Popen(["xdg-open", link])
+                subprocess.Popen(["xdg-open", link], stdout=subprocess.DEVNULL)
             elif sys.platform.startswith("darwin"):
-                subprocess.Popen(["open", link])
+                subprocess.Popen(["open", link], stdout=subprocess.DEVNULL)
             elif sys.platform.startswith("win32"):
                 os.startfile(link)
             else:
-                subprocess.Popen(["xdg-open", link])
+                subprocess.Popen(["xdg-open", link], stdout=subprocess.DEVNULL)

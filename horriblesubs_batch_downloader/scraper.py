@@ -71,7 +71,7 @@ class Scraper():
     def fetch_episode(self, episode):
         if episode > len(self.links) or episode < 1:
             raise ValueError("Invalid episode number, please choose a number between 1 and {}".format(len(self.links)))
-        return [self.links[episode]]
+        return [self.links[episode-1]]
 
     def fetch_episodes_in_range(self, lower, upper):
         if upper > len(self.links) or lower < 1:

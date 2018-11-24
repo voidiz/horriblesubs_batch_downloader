@@ -30,7 +30,6 @@ from .downloader import Downloader
 
 def main():
     args = docopt(__doc__)
-    print(args)
 
     # URL specified
     if args['<url>']:

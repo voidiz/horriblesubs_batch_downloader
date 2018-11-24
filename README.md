@@ -1,1 +1,2 @@
-# horriblesubs_batch_downloader
+# horriblesubs batch downloader
+

@@ -25,8 +25,9 @@ Options:
 import time
 
 from docopt import docopt
-from .scraper import Scraper
-from .downloader import Downloader
+from horriblesubs_batch_downloader.scraper import Scraper
+from horriblesubs_batch_downloader.link_handler import LinkHandler
+
 
 def main():
     args = docopt(__doc__)
@@ -34,28 +35,37 @@ def main():
     # URL specified
     if args['<url>']:
         scraper = Scraper(url=args['<url>'])
+
     # Name specified
     elif args['<show_name>']:
         scraper = Scraper(show_name=args['<show_name>'])
         scraper.create_url_from_show_name()
 
-    scraper.get_show_id()
-    print("Found show id: {}".format(scraper.show_id))
+    scraper.get_show()
+    print("Found show '{}' with id {}".format(scraper.show_name,
+                                              scraper.show_id))
     scraper.create_torrent_links(res=args['<res>'])
 
     # Range specified
     if args['<start>'] and args['<end>']:
-        downloader = Downloader(links=scraper.fetch_episodes_in_range(int(args['<start>']), int(args['<end>'])))
+        links = scraper.fetch_episodes_in_range(int(args['<start>']),
+                                                int(args['<end>']))
+
     # Episode specified
     elif args['<episode>']:
-        downloader = Downloader(links=scraper.fetch_episode(int(args['<episode>'])))
+        links = scraper.fetch_episode(int(args['<episode>']))
+
     # Fetch all
     else:
-        downloader = Downloader(links=scraper.fetch_all_episodes())
+        links = scraper.fetch_all_episodes()
 
-    print("Found {} episodes! Downloading in 5 seconds, press CTRL-C to cancel.".format(len(downloader.links)))
+    linkHandler = LinkHandler(links)
+
+    print("Found {} episodes! Downloading in 5 seconds, press CTRL-C "
+          "to cancel.".format(len(links)))
     time.sleep(5)
-    downloader.open_links()
+    linkHandler.open_links()
+
 
 if __name__ == "__main__":
     main()

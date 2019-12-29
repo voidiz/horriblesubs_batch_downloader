@@ -3,8 +3,11 @@
 """Horriblesubs Batch Downloader
 
 Usage:
-    hsbd <url> (-a | <episode> | (<start> <end>)) [-r <res>]
-    hsbd -n <show_name> (-a | <episode> | (<start> <end>)) [-r <res>]
+    hsbd <url> (-a | <episode> | (<start> <end>))
+               [-r <res>] [--add-to-rd]
+    hsbd -n <show_name> (-a | <episode> | (<start> <end>))
+               [-r <res>] [--add-to-rd]
+    hsbd --set-rd-token
     hsbd -h | --help
 
 Examples:
@@ -19,6 +22,8 @@ Options:
     -a, --all           Download all episodes.
     -n, --name          Specify show by name.
     -r, --resolution    Specify resolution (1080, 720, 480, 360).
+    --add-to-rd         Add the magnet links to RealDebrid.
+    --set-rd-token      Set RealDebrid API token.
 
 """
 
@@ -27,10 +32,16 @@ import time
 from docopt import docopt
 from horriblesubs_batch_downloader.scraper import Scraper
 from horriblesubs_batch_downloader.link_handler import LinkHandler
+from horriblesubs_batch_downloader.config import Config
 
 
 def main():
     args = docopt(__doc__)
+    config = Config()
+
+    if args['--set-rd-token']:
+        config.set_rd_api_token()
+        return
 
     # URL specified
     if args['<url>']:
@@ -61,8 +72,17 @@ def main():
 
     linkHandler = LinkHandler(links)
 
-    print("Found {} episodes! Downloading in 5 seconds, press CTRL-C "
-          "to cancel.".format(len(links)))
+    print("Found {} episodes!".format(len(links)))
+
+    # Add links to RD
+    if args['--add-to-rd']:
+        api_token = config.get_rd_api_token()
+        print("Adding links to RealDebrid")
+        linkHandler.add_to_rd(api_token)
+        return
+
+    # Download with torrent client
+    print("Downloading in 5 seconds, press CTRL-C to cancel.")
     time.sleep(5)
     linkHandler.open_links()
 

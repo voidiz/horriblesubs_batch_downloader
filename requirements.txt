@@ -2,3 +2,4 @@ requests
 docopt
 beautifulsoup4
 lxml
+appdirs

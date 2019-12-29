@@ -2,6 +2,7 @@ import requests
 import re
 from bs4 import BeautifulSoup
 
+
 class Scraper():
     _resolutions = ['1080', '720', '480', '360']
     _base_api_url = "https://horriblesubs.info/api.php?method=getshows" + \
@@ -29,7 +30,7 @@ class Scraper():
                 selector = "[class^='rls-link link-'] .hs-magnet-link a"
             else:
                 selector = ".link-{}p .hs-magnet-link a".format(res)
-            
+
             self.selectors[res] = selector
 
     def create_url_from_show_name(self):
